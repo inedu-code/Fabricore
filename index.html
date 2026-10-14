@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FabriCore – AI Predictive Maintenance & CNC Vibration Telemetry</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* ---------- RESET & BASE ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #0a1628;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ---------- BUTTONS ---------- */
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, #1e40af, #1e3a8a);
+            color: #fff;
+            font-weight: 600;
+            padding: 14px 36px;
+            border-radius: 40px;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(30, 64, 175, 0.35);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(30, 64, 175, 0.5);
+        }
+        .btn-secondary {
+            display: inline-block;
+            background: transparent;
+            color: #1e40af;
+            font-weight: 600;
+            padding: 14px 36px;
+            border-radius: 40px;
+            border: 2px solid #1e40af;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(30, 64, 175, 0.06);
+        }
+        .btn-outline-light {
+            display: inline-block;
+            background: transparent;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 24px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-light:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: #60a5fa;
+        }
+        .btn-sm {
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid #d1d9e6;
+            background: #fff;
+            color: #475569;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .btn-sm:hover {
+            border-color: #1e40af;
+            color: #1e40af;
+        }
+        .btn-sm.active {
+            background: #1e40af;
+            color: #fff;
+            border-color: #1e40af;
+        }
+        .btn-alert {
+            display: inline-block;
+            background: #ef4444;
+            color: #fff;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: none;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-alert:hover {
+            background: #dc2626;
+        }
+
+        /* ---------- HEADER / NAV ---------- */
+        header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(30, 64, 175, 0.08);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 999;
+            padding: 10px 0;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #0a1628;
+        }
+        .logo span {
+            color: #1e40af;
+        }
+        .logo .gear-icon {
+            display: inline-block;
+            margin-right: 4px;
+            color: #1e40af;
+            animation: spin-slow 8s linear infinite;
+        }
+        @keyframes spin-slow {
+            to { transform: rotate(360deg); }
+        }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            list-style: none;
+            font-weight: 500;
+            color: #475569;
+        }
+        .nav-links a {
+            transition: color 0.2s;
+        }
+        .nav-links a:hover {
+            color: #1e40af;
+        }
+        .nav-links .btn-primary {
+            padding: 8px 22px;
+            font-size: 0.85rem;
+        }
+        .hamburger {
+            display: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #0a1628;
+        }
+
+        /* ---------- HERO ---------- */
+        .hero {
+            padding: 150px 0 80px;
+            background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 40%, #ffffff 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '⚙️';
+            position: absolute;
+            top: -5%;
+            right: -3%;
+            font-size: 20rem;
+            opacity: 0.04;
+            transform: rotate(10deg);
+        }
+        .hero .container {
+            position: relative;
+            z-index: 2;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(30, 64, 175, 0.10);
+            color: #1e40af;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(30, 64, 175, 0.12);
+        }
+        .hero-badge i {
+            margin-right: 8px;
+        }
+        .hero h1 {
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1.12;
+            color: #0a1628;
+            max-width: 900px;
+            margin: 0 auto 20px;
+        }
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #1e40af, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            color: #475569;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hero-stats {
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(8px);
+            border-radius: 20px;
+            padding: 30px 40px;
+            border: 1px solid rgba(30, 64, 175, 0.08);
+        }
+        .hero-stats .stat-item {
+            text-align: center;
+        }
+        .hero-stats .stat-item .number {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #1e40af;
+        }
+        .hero-stats .stat-item .label {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        /* ---------- SECTIONS GENERAL ---------- */
+        section {
+            padding: 80px 0;
+        }
+        .section-title {
+            font-size: 2.6rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 16px;
+            color: #0a1628;
+        }
+        .section-title .highlight {
+            background: linear-gradient(135deg, #1e40af, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .section-sub {
+            text-align: center;
+            color: #64748b;
+            max-width: 720px;
+            margin: 0 auto 50px;
+            font-size: 1.2rem;
+        }
+        .section-light {
+            background: #ffffff;
+        }
+        .section-blue {
+            background: #eff6ff;
+        }
+
+        /* ---------- WHAT WE DO ---------- */
+        .what-we-do {
+            background: #ffffff;
+        }
+        .wwd-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+        .wwd-grid .text h3 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+            color: #0a1628;
+        }
+        .wwd-grid .text p {
+            color: #475569;
+            margin-bottom: 16px;
+        }
+        .wwd-grid .visual {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(30, 64, 175, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .wwd-grid .visual .gear-bg {
+            position: absolute;
+            font-size: 12rem;
+            opacity: 0.04;
+            right: -20px;
+            bottom: -30px;
+            transform: rotate(-10deg);
+        }
+        .wwd-grid .visual i {
+            font-size: 4rem;
+            color: #1e40af;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 2;
+        }
+        .wwd-grid .visual p {
+            color: #475569;
+            position: relative;
+            z-index: 2;
+        }
+        .wwd-grid .visual .highlight-text {
+            color: #1e40af;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ---------- PLATFORM (AI FEATURES) ---------- */
+        .platform {
+            background: #eff6ff;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .feature-card {
+            background: #ffffff;
+            padding: 32px 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(30, 64, 175, 0.06);
+            transition: 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #1e40af, #60a5fa);
+            opacity: 0;
+            transition: 0.3s;
+        }
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(30, 64, 175, 0.08);
+            border-color: rgba(30, 64, 175, 0.12);
+        }
+        .feature-card .icon-wrapper {
+            width: 56px;
+            height: 56px;
+            background: #eff6ff;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .feature-card .icon-wrapper i {
+            font-size: 1.8rem;
+            color: #1e40af;
+        }
+        .feature-card h4 {
+            font-size: 1.2rem;
+            color: #0a1628;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+        .feature-card .tag {
+            display: inline-block;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 12px;
+            border-radius: 20px;
+            margin-top: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* ---------- VIBRATION TELEMETRY DASHBOARD ---------- */
+        .vibration-dash {
+            background: #ffffff;
+            padding: 60px 0;
+        }
+        .vibration-dash .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        .vibration-dash .dash-main {
+            background: #eff6ff;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(30, 64, 175, 0.06);
+        }
+        .vibration-dash .dash-main .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+        .vibration-dash .dash-main .dash-header .status-text i {
+            color: #22c55e;
+            margin-right: 8px;
+        }
+        .vibration-dash .dash-main .vibration-monitor {
+            background: #0a1628;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(30, 64, 175, 0.15);
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+        }
+        .vibration-dash .dash-main .vibration-monitor .freq-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(30, 64, 175, 0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 64, 175, 0.06) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .vibration-dash .dash-main .vibration-monitor .wave-svg {
+            position: relative;
+            width: 100%;
+            height: 120px;
+        }
+        .vibration-dash .dash-main .vibration-monitor .wave-svg svg {
+            width: 100%;
+            height: 120px;
+        }
+        .vibration-dash .dash-main .vibration-monitor .wave-svg svg .wave-normal {
+            fill: none;
+            stroke: #60a5fa;
+            stroke-width: 1.5;
+            filter: drop-shadow(0 0 3px rgba(96, 165, 250, 0.6));
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            animation: drawWave 4s linear infinite;
+        }
+        @keyframes drawWave {
+            to { stroke-dashoffset: 0; }
+        }
+        .vibration-dash .dash-main .vibration-monitor .wave-svg svg .wave-anomaly {
+            fill: none;
+            stroke: #ef4444;
+            stroke-width: 2.5;
+            filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.9));
+            stroke-dasharray: 2000;
+            stroke-dashoffset: 2000;
+            animation: drawWave 3s linear infinite;
+        }
+        .vibration-dash .dash-main .vibration-monitor .wave-label {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            color: #60a5fa;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .vibration-dash .dash-main .vibration-monitor .wave-freq {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            color: #60a5fa;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        .vibration-dash .dash-main .vibration-monitor .wave-freq span {
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: #94a3b8;
+            margin-left: 4px;
+        }
+        .vibration-dash .dash-main .machine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+        .vibration-dash .dash-main .machine-grid .machine-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid rgba(30, 64, 175, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: 0.3s;
+        }
+        .vibration-dash .dash-main .machine-grid .machine-card:hover {
+            border-color: rgba(30, 64, 175, 0.2);
+        }
+        .vibration-dash .dash-main .machine-grid .machine-card .machine-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #dbeafe;
+            color: #1e40af;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .vibration-dash .dash-main .machine-grid .machine-card .machine-icon.alert {
+            background: #fee2e2;
+            color: #ef4444;
+            animation: pulse-machine 1.2s infinite;
+        }
+        @keyframes pulse-machine {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+        }
+        .vibration-dash .dash-main .machine-grid .machine-card .machine-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .vibration-dash .dash-main .machine-grid .machine-card .machine-info .machine-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #0a1628;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .vibration-dash .dash-main .machine-grid .machine-card .machine-info .machine-vib {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .vibration-dash .dash-main .machine-grid .machine-card .machine-info .machine-vib.alert {
+            color: #ef4444;
+            font-weight: 600;
+        }
+        .vibration-dash .dash-sidebar {
+            background: #eff6ff;
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid rgba(30, 64, 175, 0.06);
+        }
+        .vibration-dash .dash-sidebar h4 {
+            color: #0a1628;
+            margin-bottom: 16px;
+            font-size: 1.1rem;
+        }
+        .vibration-dash .dash-sidebar .metric-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(30, 64, 175, 0.06);
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .vibration-dash .dash-sidebar .metric-item:last-child {
+            border-bottom: none;
+        }
+        .vibration-dash .dash-sidebar .metric-item .value {
+            font-weight: 700;
+        }
+        .vibration-dash .dash-sidebar .metric-item .value.good { color: #22c55e; }
+        .vibration-dash .dash-sidebar .metric-item .value.warning { color: #f59e0b; }
+        .vibration-dash .dash-sidebar .metric-item .value.danger { color: #ef4444; }
+        .vibration-dash .dash-sidebar .alert-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(30, 64, 175, 0.06);
+            color: #475569;
+            font-size: 0.85rem;
+        }
+        .vibration-dash .dash-sidebar .alert-item:last-child {
+            border-bottom: none;
+        }
+        .vibration-dash .dash-sidebar .alert-item .alert-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+        }
+        .vibration-dash .dash-sidebar .alert-item .alert-icon.danger {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+        .vibration-dash .dash-sidebar .alert-item .alert-icon.warning {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+        .vibration-dash .dash-sidebar .alert-item .alert-icon.success {
+            background: #dcfce7;
+            color: #22c55e;
+        }
+        .vibration-dash .dash-sidebar .alert-item .alert-time {
+            margin-left: auto;
+            font-size: 0.7rem;
+            color: #94a3b8;
+        }
+        .vibration-dash .dash-sidebar .uptime-bar {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid rgba(30, 64, 175, 0.06);
+        }
+        .vibration-dash .dash-sidebar .uptime-bar .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+        .vibration-dash .dash-sidebar .uptime-bar .bar-track {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .vibration-dash .dash-sidebar .uptime-bar .bar-track .fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e40af, #60a5fa);
+            border-radius: 4px;
+            transition: width 1s ease;
+            width: 97%;
+        }
+
+        /* ---------- WHY FABRICORE ---------- */
+        .why {
+            background: #eff6ff;
+        }
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+        .why-grid .why-item {
+            padding: 30px 20px;
+            border-radius: 20px;
+            background: #ffffff;
+            border: 1px solid rgba(30, 64, 175, 0.06);
+            transition: 0.3s;
+        }
+        .why-grid .why-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(30, 64, 175, 0.06);
+        }
+        .why-grid .why-item .number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1e40af;
+        }
+        .why-grid .why-item p {
+            color: #475569;
+            font-weight: 500;
+        }
+
+        /* ---------- WHO WE SERVE ---------- */
+        .serve {
+            background: #ffffff;
+        }
+        .serve-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+        }
+        .serve-card {
+            background: #eff6ff;
+            padding: 30px 20px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(30, 64, 175, 0.04);
+            transition: 0.3s;
+        }
+        .serve-card:hover {
+            border-color: rgba(30, 64, 175, 0.12);
+            transform: translateY(-4px);
+        }
+        .serve-card i {
+            font-size: 2.6rem;
+            color: #1e40af;
+            margin-bottom: 12px;
+        }
+        .serve-card h4 {
+            font-size: 1.2rem;
+            color: #0a1628;
+        }
+        .serve-card p {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        /* ---------- TESTIMONIALS ---------- */
+        .testimonials {
+            background: #eff6ff;
+        }
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        .testimonial-card {
+            background: #ffffff;
+            padding: 28px 24px;
+            border-radius: 20px;
+            border: 1px solid rgba(30, 64, 175, 0.06);
+        }
+        .testimonial-card .quote {
+            font-size: 1rem;
+            color: #334155;
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+        .testimonial-card .author {
+            font-weight: 600;
+            color: #0a1628;
+        }
+        .testimonial-card .role {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .testimonial-card .stars {
+            color: #f59e0b;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* ---------- TEAM ---------- */
+        .team {
+            background: #ffffff;
+        }
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 35px;
+        }
+        .team-card {
+            text-align: center;
+            background: #eff6ff;
+            padding: 28px 20px 24px;
+            border-radius: 24px;
+            transition: 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .team-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(30, 64, 175, 0.12);
+            box-shadow: 0 20px 40px rgba(30, 64, 175, 0.06);
+        }
+        .team-card .avatar-img {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #fff;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+            margin-bottom: 14px;
+        }
+        .team-card h4 {
+            font-size: 1.1rem;
+            color: #0a1628;
+            margin-bottom: 2px;
+        }
+        .team-card .title {
+            color: #1e40af;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .team-card .bio {
+            color: #64748b;
+            font-size: 0.85rem;
+            margin: 8px 0 12px;
+        }
+        .team-card .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        .team-card .social-icons a {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            transition: 0.2s;
+        }
+        .team-card .social-icons a:hover {
+            color: #1e40af;
+        }
+
+        /* ---------- CONTACT ---------- */
+        .contact {
+            background: #eff6ff;
+        }
+        .contact-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+        .contact-form input,
+        .contact-form textarea,
+        .contact-form select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #d1d9e6;
+            border-radius: 12px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            background: #ffffff;
+            color: #0a1628;
+            transition: 0.2s;
+        }
+        .contact-form input:focus,
+        .contact-form textarea:focus,
+        .contact-form select:focus {
+            border-color: #1e40af;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.08);
+        }
+        .contact-form textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .contact-form select option {
+            background: #ffffff;
+        }
+        .contact-info p {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #475569;
+        }
+        .contact-info i {
+            width: 24px;
+            color: #1e40af;
+        }
+        .contact-info .emergency-box {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 16px;
+            border-left: 4px solid #ef4444;
+            margin-top: 20px;
+        }
+        .contact-info .emergency-box h4 {
+            color: #ef4444;
+        }
+
+        /* ---------- GET STARTED ---------- */
+        .get-started {
+            background: linear-gradient(135deg, #0a1628, #172554);
+            color: #fff;
+            text-align: center;
+        }
+        .get-started h2 {
+            font-size: 2.6rem;
+        }
+        .get-started h2 .highlight {
+            background: linear-gradient(135deg, #60a5fa, #1e40af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .get-started p {
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 16px auto 32px;
+        }
+        .get-started .steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0 30px;
+        }
+        .get-started .steps .step {
+            flex: 1 1 180px;
+        }
+        .get-started .steps .step .num {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #60a5fa;
+        }
+        .get-started .steps .step h4 {
+            color: #fff;
+        }
+        .get-started .steps .step p {
+            color: #94a3b8;
+            font-size: 0.95rem;
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            background: #060e14;
+            color: #94a3b8;
+            padding: 40px 0 20px;
+            border-top: 1px solid rgba(30, 64, 175, 0.06);
+        }
+        footer .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        footer .footer-grid h4 {
+            color: #fff;
+            margin-bottom: 12px;
+        }
+        footer .footer-grid a {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+        footer .footer-grid a:hover {
+            color: #60a5fa;
+        }
+        footer .bottom {
+            border-top: 1px solid rgba(255,255,255,0.04);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+        footer .social i {
+            font-size: 1.4rem;
+            margin-left: 16px;
+            transition: 0.2s;
+        }
+        footer .social i:hover {
+            color: #60a5fa;
+        }
+
+        /* ---------- RESPONSIVE ---------- */
+        @media (max-width: 1024px) {
+            .vibration-dash .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 900px) {
+            .hero h1 { font-size: 2.6rem; }
+            .wwd-grid { grid-template-columns: 1fr; }
+            .contact-wrap { grid-template-columns: 1fr; }
+            footer .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 700px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                background: #ffffff;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                width: 100%;
+                padding: 30px 24px;
+                gap: 18px;
+                border-bottom: 1px solid rgba(30, 64, 175, 0.08);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.04);
+            }
+            .nav-links.open {
+                display: flex;
+            }
+            .hamburger {
+                display: block;
+            }
+            .hero {
+                padding: 120px 0 60px;
+            }
+            .hero h1 { font-size: 2rem; }
+            .hero-stats {
+                gap: 30px;
+                padding: 20px;
+            }
+            .why-grid { grid-template-columns: 1fr 1fr; }
+            .testimonial-grid { grid-template-columns: 1fr; }
+            footer .footer-grid { grid-template-columns: 1fr; }
+            .vibration-dash .dash-main .machine-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header>
+        <nav class="container">
+            <div class="logo"><span class="gear-icon">⚙️</span>Fabri<span>Core</span></div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#what">What We Do</a></li>
+                <li><a href="#platform">Platform</a></li>
+                <li><a href="#why">Why FabriCore</a></li>
+                <li><a href="#serve">Who We Serve</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
+                <li><a href="#team">Team</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#getstarted" class="btn-primary">Get Started</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-badge"><i class="fas fa-microchip"></i> Industrial IoT • Acoustic AI • Vibration Telemetry</div>
+            <h1>Hear the Failure <span class="highlight">Before It Happens</span></h1>
+            <p>AI-powered acoustic and vibration monitoring that catches microscopic spindle imbalances, belt degradation, and bearing wear — so you fix machines before they halt your assembly line.</p>
+            <div class="hero-buttons">
+                <a href="#getstarted" class="btn-primary"><i class="fas fa-wrench"></i> Start Free Trial</a>
+                <a href="#platform" class="btn-secondary">Explore the Platform</a>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <div class="number">94%</div>
+                    <div class="label">Early Fault Detection</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">42%</div>
+                    <div class="label">Reduction in Unplanned Downtime</div>
+                </div>
+                <div class="stat-item">
+                    <div class="number">18K+</div>
+                    <div class="label">Machines Monitored</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== WHAT WE DO ===== -->
+    <section id="what" class="what-we-do">
+        <div class="container">
+            <div class="wwd-grid">
+                <div class="text">
+                    <h3>Your Machines Are <span style="color:#1e40af;">Talking</span>. We Translate.</h3>
+                    <p><strong>The Challenge:</strong> Manufacturing equipment fails unpredictably — a worn spindle bearing or frayed drive belt can halt an entire assembly line, costing $250K+ per hour. Traditional maintenance is either reactive (too late) or scheduled (wasteful).</p>
+                    <p><strong>The FabriCore Solution:</strong> Our industrial IoT platform captures <strong>acoustic signatures and microscopic vibrations</strong> from CNC machines, lathes, presses, and conveyors. Deep learning models — trained on 40M+ hours of machine sound — detect <strong>spindle imbalances, belt degradation, bearing wear, and lubrication failures</strong> weeks before they cause a breakdown.</p>
+                    <p style="font-weight:600; color:#1e40af;">✅ 94% Detection • ✅ 42% Less Downtime • ✅ Real-Time Alerts</p>
+                </div>
+                <div class="visual">
+                    <div class="gear-bg">⚙️</div>
+                    <i class="fas fa-wave-square"></i>
+                    <p style="font-size:1.2rem; font-weight:600; color:#0a1628;">AI Acoustic & Vibration Monitoring</p>
+                    <p><span class="highlight-text">🎙️ Sound Capture</span> → <span class="highlight-text">⚡ AI Analysis</span> → <span class="highlight-text">🔧 Predictive Alert</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PLATFORM (AI FEATURES) ===== -->
+    <section id="platform" class="platform">
+        <div class="container">
+            <h2 class="section-title">The <span class="highlight">Predictive Maintenance</span> AI Stack</h2>
+            <p class="section-sub">Four AI layers that transform machine sounds into actionable maintenance intelligence.</p>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-microphone-alt"></i></div>
+                    <h4>Acoustic Anomaly Detection</h4>
+                    <p>Deep learning models trained on 40M+ hours of machine audio detect subtle changes in sound signatures — catching spindle imbalances and bearing wear before they escalate.</p>
+                    <span class="tag">Acoustic AI</span>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-wave-square"></i></div>
+                    <h4>Vibration Frequency Analysis</h4>
+                    <p>High-sensitivity accelerometers capture microscopic vibrations. FFT and wavelet transforms identify specific fault frequencies — matching them to known failure modes.</p>
+                    <span class="tag">FFT • Wavelet</span>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-brain"></i></div>
+                    <h4>Failure Prediction Engine</h4>
+                    <p>Recurrent neural networks analyze time-series vibration data to predict remaining useful life (RUL) for bearings, belts, spindles, and motors — with days or weeks of lead time.</p>
+                    <span class="tag">RNN • RUL</span>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-wrapper"><i class="fas fa-bell"></i></div>
+                    <h4>Real-Time Alert System</h4>
+                    <p>When anomalies are detected, maintenance teams receive instant alerts via SMS, email, and dashboard — with severity scores, location, and recommended action.</p>
+                    <span class="tag">Real-Time • Instant</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== VIBRATION TELEMETRY DASHBOARD ===== -->
+    <section class="vibration-dash">
+        <div class="container">
+            <div class="dash-main">
+                <div class="dash-header">
+                    <span class="status-text"><i class="fas fa-circle" style="color:#22c55e;"></i> LIVE — FabriCore Telemetry Dashboard</span>
+                    <span style="color:#64748b;">AI Confidence: 96.8%</span>
+                </div>
+                <div class="vibration-monitor">
+                    <div class="freq-grid"></div>
+                    <div class="wave-label">VIBRATION SIGNATURE — SPINDLE #A-12</div>
+                    <div class="wave-freq">1,847 <span>Hz</span></div>
+                    <div class="wave-svg">
+                        <svg viewBox="0 0 1000 120" preserveAspectRatio="none">
+                            <polyline class="wave-normal" points="0,60 20,58 30,60 40,55 50,60 60,58 70,60 80,52 90,60 100,58 110,60 120,50 130,60 140,58 150,60 160,55 170,60 180,58 190,60 200,48 210,60 220,58 230,60 240,52 250,60 260,58 270,60 280,50 290,60 300,58 310,60 320,55 330,60 340,58 350,60 360,48 370,60 380,58 390,60 400,52 410,60 420,58 430,60 440,50 450,60 460,58 470,60 480,55 490,60 500,58 510,60 520,48 530,60 540,58 550,60 560,52 570,60 580,58 590,60 600,50 610,60 620,58 630,60 640,55 650,60 660,58 670,60 680,48 690,60 700,58 710,60 720,52 730,60 740,58 750,60 760,50 770,60 780,58 790,60 800,55 810,60 820,58 830,60 840,48 850,60 860,58 870,60 880,52 890,60 900,58 910,60 920,50 930,60 940,58 950,60 960,55 970,60 980,58 990,60 1000,50" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="machine-grid" id="machineGrid">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+            <div class="dash-sidebar">
+                <h4><i class="fas fa-chart-bar" style="color:#1e40af;"></i> Factory Metrics</h4>
+                <div class="metric-item"><span>🔧 Machines Live</span><span class="value good" id="machinesLive">42</span></div>
+                <div class="metric-item"><span>⚠️ Anomalies Flagged</span><span class="value warning" id="anomaliesFlagged">3</span></div>
+                <div class="metric-item"><span>🚨 Critical Alerts</span><span class="value danger" id="criticalAlerts">1</span></div>
+                <div class="metric-item"><span>📊 Avg. Detection Lead</span><span class="value good" id="avgLead">18 days</span></div>
+                <div style="margin-top:12px;">
+                    <h4><i class="fas fa-bell" style="color:#1e40af;"></i> Live Alerts</h4>
+                    <div id="dashAlerts">
+                        <div class="alert-item">
+                            <span class="alert-icon danger"><i class="fas fa-exclamation"></i></span>
+                            <div><strong style="color:#ef4444;">Spindle Imbalance</strong><br />CNC #A-12 — vib 4.2x normal</div>
+                            <span class="alert-time">28s ago</span>
+                        </div>
+                        <div class="alert-item">
+                            <span class="alert-icon warning"><i class="fas fa-exclamation-triangle"></i></span>
+                            <div><strong style="color:#f59e0b;">Belt Degradation</strong><br />Conveyor #C-08 — freq drift</div>
+                            <span class="alert-time">4 min ago</span>
+                        </div>
+                        <div class="alert-item">
+                            <span class="alert-icon success"><i class="fas fa-check"></i></span>
+                            <div><strong style="color:#22c55e;">Bearing Lubricated</strong><br />Lathe #L-04 — vib normal</div>
+                            <span class="alert-time">12 min ago</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="uptime-bar">
+                    <div class="bar-label">
+                        <span>Line Uptime</span>
+                        <span id="uptimeLabel">97%</span>
+                    </div>
+                    <div class="bar-track"><div class="fill" id="uptimeFill" style="width:97%;"></div></div>
+                    <div style="font-size:0.7rem; color:#94a3b8; margin-top:4px;">
+                        <i class="fas fa-shield-alt"></i> vs 82% industry avg
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== WHY FABRICORE ===== -->
+    <section id="why" class="why">
+        <div class="container">
+            <h2 class="section-title">The <span class="highlight">Manufacturing</span> Impact</h2>
+            <p class="section-sub">Real outcomes from factories using our platform.</p>
+            <div class="why-grid">
+                <div class="why-item">
+                    <div class="number">94%</div>
+                    <p>Early fault detection accuracy — catching failures weeks in advance</p>
+                </div>
+                <div class="why-item">
+                    <div class="number">42%</div>
+                    <p>Reduction in unplanned downtime vs. traditional maintenance</p>
+                </div>
+                <div class="why-item">
+                    <div class="number">$1.8M</div>
+                    <p>Average annual savings per production line</p>
+                </div>
+                <div class="why-item">
+                    <div class="number">18K+</div>
+                    <p>Industrial machines monitored across 340 factories</p>
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:30px; background:#dbeafe; padding:24px; border-radius:20px; border:1px solid rgba(30,64,175,0.08);">
+                <p style="font-size:1.1rem; font-weight:500; color:#1e40af;"><i class="fas fa-cog"></i> "Every hour of downtime prevented is $250K in production preserved."</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== WHO WE SERVE ===== -->
+    <section id="serve" class="serve">
+        <div class="container">
+            <h2 class="section-title">Built for <span class="highlight">Heavy Manufacturing</span></h2>
+            <p class="section-sub">FabriCore empowers every stakeholder in the production ecosystem.</p>
+            <div class="serve-grid">
+                <div class="serve-card">
+                    <i class="fas fa-industry"></i>
+                    <h4>Factory Operators</h4>
+                    <p>Monitor every critical machine on your production line with AI-powered acoustic and vibration telemetry.</p>
+                </div>
+                <div class="serve-card">
+                    <i class="fas fa-wrench"></i>
+                    <h4>Maintenance Teams</h4>
+                    <p>Shift from reactive repairs to predictive maintenance — fix machines during planned downtime, not during production.</p>
+                </div>
+                <div class="serve-card">
+                    <i class="fas fa-cogs"></i>
+                    <h4>CNC Machining Shops</h4>
+                    <p>Protect high-value spindles, tooling, and precision equipment with microscopic vibration analysis.</p>
+                </div>
+                <div class="serve-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Plant Managers</h4>
+                    <p>Track OEE, uptime, and equipment health across all production lines in real-time dashboards.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TESTIMONIALS ===== -->
+    <section id="testimonials" class="testimonials">
+        <div class="container">
+            <h2 class="section-title">What <span class="highlight">Plant Managers</span> Say</h2>
+            <p class="section-sub">Trusted by manufacturers worldwide.</p>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="quote">“FabriCore detected a failing spindle bearing 23 days before it would have seized. We scheduled replacement during a planned shutdown — no downtime, no scrapped parts. Unbelievable.”</p>
+                    <p class="author">— David Chen</p>
+                    <p class="role">Plant Manager, Precision Metal Works</p>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="quote">“We reduced unplanned downtime by 42% in the first quarter. The acoustic AI catches belt degradation that our vibration sensors alone would miss.”</p>
+                    <p class="author">— Sarah Martinez</p>
+                    <p class="role">VP of Operations, AutoParts Manufacturing</p>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p class="quote">“The predictive alerts are incredibly precise. Our maintenance team now operates on data, not guesswork. ROI was under 6 months.”</p>
+                    <p class="author">— Dr. Klaus Weber</p>
+                    <p class="role">Director of Engineering, Bosch Manufacturing</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TEAM ===== -->
+    <section id="team" class="team">
+        <div class="container">
+            <h2 class="section-title">The <span class="highlight">Predictive Maintenance</span> Team</h2>
+            <p class="section-sub">Mechanical engineers, AI researchers, and industrial IoT experts united to eliminate downtime.</p>
+            <div class="team-grid">
+                <div class="team-card">
+                    <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="Dr. James Okafor" class="avatar-img" />
+                    <h4>Dr. James Okafor</h4>
+                    <p class="title">CEO & Co-Founder</p>
+                    <p class="bio">Mechanical engineer with 20+ years in industrial automation. Former Siemens manufacturing lead.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-x-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Dr. Emily Zhang" class="avatar-img" />
+                    <h4>Dr. Emily Zhang</h4>
+                    <p class="title">CTO & Co-Founder</p>
+                    <p class="bio">AI/ML Ph.D. specializing in acoustic signal processing and predictive maintenance.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://randomuser.me/api/portraits/men/55.jpg" alt="Robert Kim" class="avatar-img" />
+                    <h4>Robert Kim</h4>
+                    <p class="title">Head of Field Operations</p>
+                    <p class="bio">Certified maintenance engineer. Has deployed IoT sensor networks in 200+ factories.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://randomuser.me/api/portraits/women/82.jpg" alt="Dr. Maria Santos" class="avatar-img" />
+                    <h4>Dr. Maria Santos</h4>
+                    <p class="title">VP of Product</p>
+                    <p class="bio">Product leader with deep experience in industrial IoT and manufacturing analytics platforms.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-x-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Ready to <span class="highlight">Eliminate</span> Unplanned Downtime?</h2>
+            <p class="section-sub">Tell us about your factory, and we'll show you how FabriCore can help.</p>
+            <div class="contact-wrap">
+                <form class="contact-form" id="contactForm">
+                    <input type="text" placeholder="Full Name" required />
+                    <input type="text" placeholder="Company / Factory Name" required />
+                    <input type="email" placeholder="Work Email" required />
+                    <input type="tel" placeholder="Phone Number" />
+                    <select>
+                        <option value="">Select your primary role</option>
+                        <option>Factory Operator</option>
+                        <option>Maintenance Manager</option>
+                        <option>CNC Machining Shop</option>
+                        <option>Plant Manager</option>
+                        <option>Engineering Director</option>
+                    </select>
+                    <input type="text" placeholder="Number of machines on your production line" />
+                    <textarea placeholder="Describe your downtime challenges (spindle failures, belt degradation, bearing wear, etc.)"></textarea>
+                    <button type="submit" class="btn-primary" style="width:100%;"><i class="fas fa-wrench"></i> Request a Demo</button>
+                </form>
+                <div class="contact-info">
+                    <p><i class="fas fa-envelope"></i> info@fabricore.ai</p>
+                    <p><i class="fas fa-phone-alt"></i> +1 (888) 555-CNC (262) – 24/7 support</p>
+                    <p><i class="fas fa-map-pin"></i> 440 Factory Way, Suite 300, Detroit, MI 48201</p>
+                    <div class="emergency-box">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Urgent Machine Failure</h4>
+                        <p>For active machine failure or production line stoppage, our engineering response team is available 24/7. <strong>We prioritize production continuity.</strong></p>
+                        <p style="color:#ef4444; font-weight:600;">+1 (888) 555-CNC (262) ext. 911</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== GET STARTED ===== -->
+    <section id="getstarted" class="get-started">
+        <div class="container">
+            <h2>Start <span class="highlight">Preventing</span> Machine Failures Today</h2>
+            <p>Deploy FabriCore in your factory in days. Start catching spindle imbalances, belt wear, and bearing failures before they halt your line.</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="num">1</div>
+                    <h4>Install</h4>
+                    <p>Attach acoustic sensors and vibration accelerometers to critical machines — installation takes minutes.</p>
+                </div>
+                <div class="step">
+                    <div class="num">2</div>
+                    <h4>Calibrate</h4>
+                    <p>Our AI learns the healthy acoustic signature of each machine in 72 hours of baseline monitoring.</p>
+                </div>
+                <div class="step">
+                    <div class="num">3</div>
+                    <h4>Predict</h4>
+                    <p>Receive early fault alerts weeks before failure — enabling planned repairs with zero production impact.</p>
+                </div>
+            </div>
+            <a href="#contact" class="btn-primary" style="background:linear-gradient(135deg, #60a5fa, #1e40af); box-shadow: 0 8px 30px rgba(30,64,175,0.4);"><i class="fas fa-rocket"></i> Start Your Free Trial</a>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="logo" style="color:#fff; font-size:1.6rem;"><span class="gear-icon" style="color:#60a5fa;">⚙️</span>Fabri<span style="color:#60a5fa;">Core</span></div>
+                    <p style="margin-top:10px; max-width:280px; font-size:0.95rem;">AI-powered predictive maintenance and CNC vibration telemetry for industrial manufacturing.</p>
+                </div>
+                <div>
+                    <h4>Platform</h4>
+                    <a href="#platform">AI Features</a>
+                    <a href="#why">Why FabriCore</a>
+                    <a href="#testimonials">Case Studies</a>
+                    <a href="#contact">Support</a>
+                </div>
+                <div>
+                    <h4>Legal</h4>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">ISO 55000 Compliance</a>
+                    <a href="#">Industry Standards</a>
+                </div>
+                <div>
+                    <h4>Connect</h4>
+                    <div class="social">
+                        <i class="fab fa-linkedin"></i>
+                        <i class="fab fa-youtube"></i>
+                        <i class="fab fa-x-twitter"></i>
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <p style="margin-top:12px; font-size:0.85rem;">📬 info@fabricore.ai</p>
+                    <p style="font-size:0.85rem;">📞 +1 (888) 555-CNC</p>
+                </div>
+            </div>
+            <div class="bottom">
+                <span>&copy; 2026 FabriCore. All rights reserved.</span>
+                <span><i class="fas fa-cog" style="color:#60a5fa;"></i> AI for zero-downtime manufacturing</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===== JAVASCRIPT ===== -->
+    <script>
+        // Hamburger toggle
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('open');
+            });
+        });
+
+        // ===== MACHINE GRID SIMULATOR =====
+        const machineGrid = document.getElementById('machineGrid');
+
+        const machines = [
+            { name: 'CNC Mill A-12', vib: 4.2, status: 'alert', icon: 'fa-cog' },
+            { name: 'Lathe L-04', vib: 1.1, status: 'good', icon: 'fa-circle-notch' },
+            { name: 'Conveyor C-08', vib: 2.8, status: 'warning', icon: 'fa-arrows-alt-h' },
+            { name: 'Press P-22', vib: 1.4, status: 'good', icon: 'fa-compress' },
+            { name: 'Drill D-06', vib: 3.4, status: 'warning', icon: 'fa-bolt' },
+            { name: 'Grinder G-14', vib: 1.2, status: 'good', icon: 'fa-circle' },
+            { name: 'CNC Mill A-15', vib: 1.0, status: 'good', icon: 'fa-cog' },
+            { name: 'Lathe L-09', vib: 1.8, status: 'good', icon: 'fa-circle-notch' },
+        ];
+
+        function renderMachines() {
+            let html = '';
+            machines.forEach(m => {
+                let iconClass = m.icon;
+                let alertClass = '';
+                let vibClass = '';
+                if (m.status === 'alert') {
+                    alertClass = 'alert';
+                    vibClass = 'alert';
+                } else if (m.status === 'warning') {
+                    vibClass = 'alert';
+                }
+                html += `
+                    <div class="machine-card">
+                        <div class="machine-icon ${alertClass}"><i class="fas ${iconClass}"></i></div>
+                        <div class="machine-info">
+                            <div class="machine-name">${m.name}</div>
+                            <div class="machine-vib ${vibClass}">Vib: ${m.vib.toFixed(1)} mm/s • ${m.status === 'alert' ? '⚠ CRITICAL' : m.status === 'warning' ? 'Check' : 'Normal'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            machineGrid.innerHTML = html;
+        }
+
+        renderMachines();
+
+        // Update machines every 5 seconds (simulate AI monitoring)
+        setInterval(() => {
+            machines.forEach(m => {
+                const variation = (Math.random() * 0.8 - 0.4);
+                m.vib = Math.max(0.6, Math.min(5.2, m.vib + variation));
+
+                if (m.vib > 3.5) m.status = 'alert';
+                else if (m.vib > 2.2) m.status = 'warning';
+                else m.status = 'good';
+            });
+            renderMachines();
+
+            // Update metrics
+            const machinesLive = document.getElementById('machinesLive');
+            const anomaliesFlagged = document.getElementById('anomaliesFlagged');
+            const criticalAlerts = document.getElementById('criticalAlerts');
+            const avgLead = document.getElementById('avgLead');
+
+            if (machinesLive) machinesLive.textContent = Math.floor(38 + Math.random() * 8);
+            if (anomaliesFlagged) anomaliesFlagged.textContent = Math.floor(2 + Math.random() * 4);
+            if (criticalAlerts) criticalAlerts.textContent = Math.floor(0 + Math.random() * 3);
+            if (avgLead) avgLead.textContent = `${Math.floor(14 + Math.random() * 8)} days`;
+
+            // Update vibration frequency display
+            const waveFreq = document.querySelector('.wave-freq');
+            if (waveFreq) {
+                waveFreq.innerHTML = `${Math.floor(1600 + Math.random() * 500)} <span>Hz</span>`;
+            }
+
+            // Update uptime bar
+            const uptimeFill = document.getElementById('uptimeFill');
+            const uptimeLabel = document.getElementById('uptimeLabel');
+            if (uptimeFill) {
+                const uptime = Math.floor(94 + Math.random() * 5);
+                uptimeFill.style.width = `${uptime}%`;
+                uptimeLabel.textContent = `${uptime}%`;
+            }
+
+            // Update alerts
+            const dashAlerts = document.getElementById('dashAlerts');
+            if (dashAlerts && dashAlerts.children.length > 0) {
+                const alerts = [
+                    { icon: 'danger', iconClass: 'fa-exclamation', text: 'Spindle Imbalance', sub: 'CNC #A-12 — vib 4.2x normal', time: 'Just now' },
+                    { icon: 'warning', iconClass: 'fa-exclamation-triangle', text: 'Belt Degradation', sub: 'Conveyor #C-08 — freq drift', time: '2 min ago' },
+                    { icon: 'success', iconClass: 'fa-check', text: 'Bearing Lubricated', sub: 'Lathe #L-04 — vib normal', time: '6 min ago' },
+                    { icon: 'warning', iconClass: 'fa-exclamation-triangle', text: 'Bearing Wear Detected', sub: 'Drill #D-06 — vib rising', time: '9 min ago' },
+                    { icon: 'danger', iconClass: 'fa-exclamation', text: 'Motor Overheating', sub: 'Press #P-22 — temp rising', time: '14 min ago' },
+                ];
+                const firstAlert = dashAlerts.children[0];
+                if (firstAlert) {
+                    const alertData = alerts[Math.floor(Math.random() * alerts.length)];
+                    const iconDiv = firstAlert.querySelector('.alert-icon');
+                    const textDiv = firstAlert.querySelector('div');
+                    const timeSpan = firstAlert.querySelector('.alert-time');
+
+                    iconDiv.className = `alert-icon ${alertData.icon}`;
+                    iconDiv.innerHTML = `<i class="fas ${alertData.iconClass}"></i>`;
+                    textDiv.innerHTML = `<strong style="color:${alertData.icon === 'danger' ? '#ef4444' : alertData.icon === 'warning' ? '#f59e0b' : '#22c55e'};">${alertData.text}</strong><br />${alertData.sub}`;
+                    timeSpan.textContent = alertData.time;
+
+                    dashAlerts.appendChild(firstAlert);
+                }
+            }
+        }, 5000);
+
+        // Contact form
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('✅ Your demo request has been received! A FabriCore specialist will contact you within 2 hours.');
+            this.reset();
+        });
+    </script>
+
+</body>
+</html>
